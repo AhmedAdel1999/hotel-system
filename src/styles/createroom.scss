@@ -1,0 +1,42 @@
+.field{
+    width: 100%;
+    color: #444;
+    gap: 6px;
+    input,textarea{
+        padding: 8px 12px;
+        font-size: 17px;
+        border-radius: 2px;
+        height: 100%;
+        outline: none;
+        border: 2px solid #cbc8d0;
+        &:focus{
+            border-color:#7d7fed;
+        }
+
+    }
+    textarea{
+        height: 80px;
+    }
+    label{
+        font-weight: bold;
+    }
+}
+.selection-field{
+    color: #444;
+    gap: 6px;
+    flex-grow: 1;
+    select{
+        padding: 8px 12px;
+        font-size: 17px;
+        border-radius: 2px;
+        outline: none;
+        border: 2px solid #cbc8d0;
+        &:focus{
+            border-color:#7d7fed;
+        }
+
+    }
+    label{
+        font-weight: bold;
+    }
+}

@@ -1,0 +1,14 @@
+.auth{
+    margin: 60px 30px 0px 30px;
+    display: flex;
+    justify-content: center;
+
+    .auth-container{
+        width: 570px;
+        max-width: 570px;
+        min-width: 300px;
+        
+    }
+}
+@import url(../../styles/_mainform.scss);
+

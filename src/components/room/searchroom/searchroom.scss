@@ -1,0 +1,14 @@
+.formcomponent{
+    .searchinput{
+        width: 100%;
+        .MuiInputBase-input{
+            padding: 8px 14px;
+        }
+    }
+    .selectbox{
+         .MuiOutlinedInput-input{
+            padding-top: 8px;
+            padding-bottom: 8px;
+         }
+    }
+}

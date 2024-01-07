@@ -1,0 +1,93 @@
+%route-style{
+    color: #ffffff8c;
+    text-transform: capitalize;
+    transition: all 0.2s linear;
+    font-size: 16px;
+    font-weight: bold;
+    gap: 5px;
+    &:hover{
+        color:#fff;
+        background-color: inherit;
+    }
+}
+%profile-img{
+    border-radius: 50%;
+    width: 30px;
+    height: 30px
+}
+.nav-routes{
+    .btn-route{
+        padding: 0px;
+        @extend %route-style;
+        img{
+            @extend %profile-img
+        }
+        svg{
+            transform: translateY(1px);
+        }
+    }
+    a{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        @extend %route-style;
+        img{
+            @extend %profile-img
+        }
+        svg{
+            transform: translateY(1px);
+        }
+        &.active{
+            color: #fff;
+        }
+    }
+    
+}
+
+.MuiPaper-root.navbar{
+    background-color: #593196;
+    padding: 0px 56px;
+    .main-container{
+        justify-content: space-between;
+    }
+    @extend .nav-routes
+}
+
+
+.sidebar{
+    background-color: #593196;
+    flex-basis: 100%;
+    width: 250px;
+    border-top: 2px solid #000;
+    a,.btn-route{
+        border-bottom: 2px solid #000;
+        padding: 10px 0px;
+    }
+}
+
+.full-width{
+    width: 100vw;
+}
+
+#resources-menu{
+    .MuiButtonBase-root{
+        font-size: 17px;
+        font-weight: 500px;
+        color: #4443438c;
+        &:first-child{
+            border-bottom: 1px solid #4443438c
+        }
+        &:hover{
+            background-color: #593196;
+            color: #fff;
+        }
+        a{
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            width: 100%;
+            
+        }
+    }
+}
