@@ -17,7 +17,7 @@ const RoomCard = ({roomInfo}:RoomCardProps) =>{
           <CardMedia
             component='img'
             className="cardimg"
-            image={`https://hotelsystemapi.onrender.com${roomInfo.images[0].image}`}
+            image={`${roomInfo.images[0].image}`}
             alt='image'
           />
           <CardContent>

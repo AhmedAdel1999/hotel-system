@@ -41,7 +41,9 @@ const RegisterComponent = () => {
     const { files} = e.target;
     const selectedFiles = files as FileList;
     const fd = new FormData();
-    fd.append('image',selectedFiles[0])
+    fd.append('file',selectedFiles[0])
+    fd.append("upload_preset","ggimages")
+    fd.append("api_key", "372336693865194")
     setAvatar(fd)
     setProfileImg(selectedFiles[0])
 

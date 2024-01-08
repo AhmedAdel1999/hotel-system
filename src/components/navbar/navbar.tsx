@@ -69,7 +69,7 @@ const Navbar:React.FC = () =>{
                             >
                                 <img 
                                     alt="img" 
-                                    src={userInfo?.avatar?`https://hotelsystemapi.onrender.com/${userInfo.avatar}`:defaultImg}
+                                    src={userInfo?.avatar?userInfo.avatar:defaultImg}
                                 />
                                 <span>Admin</span>
                                 <FontAwesomeIcon icon={faCaretDown} />
@@ -119,7 +119,7 @@ const Navbar:React.FC = () =>{
                         <NavLink to="/profile">
                             <img 
                                 alt="img" 
-                                src={`https://hotelsystemapi.onrender.com/${userInfo.avatar}`} 
+                                src={userInfo?.avatar?userInfo.avatar:defaultImg} 
                              />
                         </NavLink>
                     </>

@@ -15,7 +15,7 @@ const RoomImgSlider = ({sliderImgs}:RoomSliderProps) =>{
                 sliderImgs.map((img:Image)=>{
                     return(
                         <SwiperSlide key={img._id}>
-                            <img alt="imgslider" height="380px" width="100%" src={`https://hotelsystemapi.onrender.com${img.image}`} />
+                            <img alt="imgslider" height="380px" width="100%" src={`${img.image}`} />
                         </SwiperSlide>
                     )
                 })

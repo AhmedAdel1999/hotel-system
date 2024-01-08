@@ -3,6 +3,7 @@ import { User,UserLogin,UserRegister } from '../interfaces/User'
 import initialInstance from '../utils/api'
 import { AddConfigObj } from '../utils/configobjs'
 import { allUsers, updateProfileType, userInfo,updatePasswordType, updateUserType, getAllUsersType, deleteUserType } from '../@types/users'
+import axios from 'axios'
 
 
 type InitialState = {
@@ -35,8 +36,8 @@ export const register = createAsyncThunk(
   }
     try {
       if(data.avatar){
-        const avatar= await initialInstance.post('uploads',data.avatar,config)
-        const res = await initialInstance.post('users/register',{...data,avatar:avatar.data[0].path})
+        const avatar= await axios.post('https://api.cloudinary.com/v1_1/dibuevfps/image/upload',data.avatar,config)
+        const res = await initialInstance.post('users/register',{...data,avatar:avatar.data.url})
         return fulfillWithValue(res.data)
       }else{
         const res = await initialInstance.post('users/register',data)
@@ -71,8 +72,8 @@ export const updateProfile = createAsyncThunk(
   }
     try {
       if(data.avatar){
-        const avatar= await initialInstance.post('uploads',data.avatar,config)
-        const res = await initialInstance.put('users/update/profile',{...data,avatar:avatar.data[0].path},AddConfigObj(token))
+        const avatar= await axios.post('https://api.cloudinary.com/v1_1/dibuevfps/image/upload',data.avatar,config)
+        const res = await initialInstance.put('users/update/profile',{...data,avatar:avatar.data.url},AddConfigObj(token))
         return fulfillWithValue(res.data)
       }else{
         const res = await initialInstance.put('users/update/profile',data,AddConfigObj(token))

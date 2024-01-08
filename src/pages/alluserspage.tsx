@@ -36,7 +36,7 @@ const AllUsers = () =>{
     const tableRow = allUsers?.users?.map((user:User)=>{
         return{
             cell1:(<Typography fontSize={17} variant="caption">{user._id}</Typography>),
-            cell2:(<Avatar alt="Remy Sharp" src={`https://hotelsystemapi.onrender.com/${user.avatar}`}/>),
+            cell2:(<Avatar alt="Remy Sharp" src={`${user.avatar}`}/>),
             cell3:(<Typography fontSize={17} variant="caption">{user.name}</Typography>),
             cell4:(<Typography fontSize={17} variant="caption">{user.email}</Typography>),
             cell5:(<Typography fontSize={17} variant="caption">{user.isAdmin?"Yes":"No"}</Typography>),

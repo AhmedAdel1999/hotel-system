@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Checkbox, Stack, Typography, FormControlLabel, Button, CircularProgress } from "@mui/material";
-import initialInstance from "../utils/api";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useToasts } from "react-toast-notifications";
 import { useNavigate, useParams } from "react-router-dom";
 import { clearRoomState, updateRoom } from "../features/roomSlice";
 import RoomImgSlider from "../components/room/rommimgslider";
+import axios from "axios";
 import "../styles/createroom.scss";
+
 
 
 
@@ -63,9 +64,11 @@ const AdminEditRoomPage = () =>{
             for (const key in updatedRoomImages) {
                 if(typeof(updatedRoomImages[key])=="object"){
                     const fd = new FormData();
-                    fd.append('image',updatedRoomImages[key])
-                    const data= await initialInstance.post('uploads',fd,config)
-                    images.push({image:`/${data.data[0].path.toString().replace("\\", "/")}`})
+                    fd.append('file',updatedRoomImages[key])
+                    fd.append("upload_preset","ggimages")
+                    fd.append("api_key", "372336693865194")
+                    const data= await axios.post('https://api.cloudinary.com/v1_1/dibuevfps/image/upload',fd,config)
+                    images.push({image:data.data.url})
                 }   
             }
 
