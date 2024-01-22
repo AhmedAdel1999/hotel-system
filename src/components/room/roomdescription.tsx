@@ -141,7 +141,7 @@ const tableRow = [{
                         )
                        }
                        {
-                        roomAvailable?
+                        roomAvailable&&(userInfo?.token)?
                           <Box sx={{marginTop:"10px"}}>
                             <PaypalButton
                               total={totalDays}
