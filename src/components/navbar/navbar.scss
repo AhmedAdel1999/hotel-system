@@ -53,7 +53,11 @@
     }
     @extend .nav-routes
 }
-
+@media (max-width:500px){
+    .MuiPaper-root.navbar{
+        padding: 0px 24px;
+    }
+}
 
 .sidebar{
     background-color: #593196;

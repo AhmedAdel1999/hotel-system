@@ -29,10 +29,12 @@ const Navbar:React.FC = () =>{
     }
     const handleClose = () => {
       setAnchorEl(null)
+      setIsDrawerOpen(false)
     }
 
     const handleLogout = () =>{
         dispatch(logout())
+        setIsDrawerOpen(false)
         navigate("/",{replace:true})
     }
     const routes = () =>{
@@ -40,23 +42,23 @@ const Navbar:React.FC = () =>{
             if(userInfo?.isAdmin){
                 return(
                     <>
-                        <NavLink to="/">
+                        <NavLink onClick={()=>setIsDrawerOpen(false)} to="/">
                             <FontAwesomeIcon icon={faHouse} />
                             <span>Home</span>
                         </NavLink>
-                        <NavLink to="/allbookings">
+                        <NavLink onClick={()=>setIsDrawerOpen(false)} to="/allbookings">
                             <FontAwesomeIcon icon={faBookmark} />
                             <span>Bookings</span>
                         </NavLink>
-                        <NavLink to="/allrooms">
+                        <NavLink onClick={()=>setIsDrawerOpen(false)} to="/allrooms">
                             <FontAwesomeIcon icon={faPersonShelter} />
                             <span>Rooms</span>
                         </NavLink>
-                        <NavLink to="/allusers">
+                        <NavLink onClick={()=>setIsDrawerOpen(false)} to="/allusers">
                             <FontAwesomeIcon icon={faUsers} />
                             <span>Users</span>
                         </NavLink>
-                        <Button onClick={handleLogout} className="btn-route">
+                        <Button onClick={handleLogout}  className="btn-route">
                             <FontAwesomeIcon icon={faRightFromBracket} />
                             <span>logout</span>
                         </Button> 
@@ -104,11 +106,11 @@ const Navbar:React.FC = () =>{
             }else{
                 return(
                     <>
-                        <NavLink to="/">
+                        <NavLink onClick={()=>setIsDrawerOpen(false)} to="/">
                             <FontAwesomeIcon icon={faHouse} />
                             <span>Home</span>
                         </NavLink>
-                        <NavLink to="/mybookings">
+                        <NavLink onClick={()=>setIsDrawerOpen(false)} to="/mybookings">
                             <FontAwesomeIcon icon={faBookmark} />
                             <span>My Bookings</span>
                         </NavLink>
@@ -116,7 +118,7 @@ const Navbar:React.FC = () =>{
                             <FontAwesomeIcon icon={faRightFromBracket} />
                             <span>logout</span>
                         </Button> 
-                        <NavLink to="/profile">
+                        <NavLink onClick={()=>setIsDrawerOpen(false)} to="/profile">
                             <img 
                                 alt="img" 
                                 src={userInfo?.avatar?userInfo.avatar:defaultImg} 
@@ -128,15 +130,15 @@ const Navbar:React.FC = () =>{
         }else{
             return(
                 <>
-                    <NavLink to="/">
+                    <NavLink onClick={()=>setIsDrawerOpen(false)} to="/">
                         <FontAwesomeIcon icon={faHouse} />
                         <span>Home</span>
                     </NavLink>
-                    <NavLink to="/login">
+                    <NavLink onClick={()=>setIsDrawerOpen(false)} to="/login">
                         <FontAwesomeIcon icon={faRightToBracket} />
                         <span>Login</span>
                     </NavLink>
-                    <NavLink to="/register">
+                    <NavLink onClick={()=>setIsDrawerOpen(false)} to="/register">
                         <FontAwesomeIcon icon={faAddressCard} />
                         <span>Register</span>
                     </NavLink> 

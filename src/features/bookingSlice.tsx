@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import initialInstance from '../utils/api'
 import { AddConfigObj } from '../utils/configobjs'
-import { Booking } from '../interfaces/Booking'
 import { CheckBookingType, allBookingsType, deleteBookingType, getAllBookingType, newBookingType } from '../@types/bookings'
 
 
@@ -141,11 +140,17 @@ const bookingSlice = createSlice({
   )
 
    //delete booking
+    builder.addCase(deleteBooking.pending,(state) => {
+        state.isLoading=true
+    })
     builder.addCase(deleteBooking.fulfilled,(state) => {
         state.successMsg='Booking Has Successfully Deleted.'
         state.isSuccess=true
-      }
-    )
+        state.isLoading=false
+    })
+    builder.addCase(deleteBooking.rejected,(state) => {
+      state.isLoading=false
+  })
   }
 })
 export const { clearBookingState } = bookingSlice.actions

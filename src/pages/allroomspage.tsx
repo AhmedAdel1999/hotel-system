@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { useToasts } from "react-toast-notifications";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import MainPagination from "../components/pagination";
@@ -11,10 +11,20 @@ import Loader from "../components/loading/loader";
 
 const AllRooms = () =>{
     const[currentPage,setCurrentPage] = useState<number>(1)
-    const{allRooms,isSuccess,successMsg} = useAppSelector((state)=>state.rooms)
+    const[currentRoomId,setCurrentRoomId]= useState<string>("")
+    const{allRooms,isSuccess,successMsg,isLoading} = useAppSelector((state)=>state.rooms)
     const{userInfo} = useAppSelector((state)=>state.user)
     const dispatch = useAppDispatch()
     const { addToast:notify } = useToasts()
+
+
+    useEffect(()=>{
+        if(allRooms?.count>0){
+            if(allRooms?.rooms.length==0){
+                setCurrentPage(currentPage - 1)
+            }
+        }
+    },[allRooms?.pages])
 
     useEffect(()=>{
         dispatch(getAllRooms({currentPage,numOfBeds:"",roomType:"",search:""}))
@@ -53,7 +63,15 @@ const AllRooms = () =>{
                        disableElevation disableRipple 
                        variant="contained" color="error" 
                        size="medium"
-                       onClick={()=>dispatch(deleteRoom({id:room._id,token:userInfo.token}))}
+                       endIcon={
+                            isLoading&&(room._id==currentRoomId)?
+                            <CircularProgress size={25} sx={{color:"#fff"}} />
+                            :null
+                        }
+                       onClick={()=>{
+                        dispatch(deleteRoom({id:room._id,token:userInfo.token}))
+                        setCurrentRoomId(room._id)
+                       }}
                     >
                         Delete
                     </Button>
@@ -86,7 +104,7 @@ const AllRooms = () =>{
             <TableShared tableHeader={tableHeader} tableRow={tableRow} />
             {
                 allRooms?.pages?(
-                 <MainPagination setCurrentPage={setCurrentPage} numOfPages={allRooms.pages} />
+                 <MainPagination currentPage={currentPage} setCurrentPage={setCurrentPage} numOfPages={allRooms.pages} />
                 )
                 :null
              }

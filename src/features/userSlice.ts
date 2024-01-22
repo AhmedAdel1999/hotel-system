@@ -8,6 +8,8 @@ import axios from 'axios'
 
 type InitialState = {
   isLoading: boolean
+  loadingProfileUpdate:boolean
+  loadingPasswordUpdate:boolean
   isError:boolean
   isSuccess:boolean
   errorMsg:string
@@ -17,6 +19,8 @@ type InitialState = {
 }
 const initialState: InitialState = {
   isLoading: false,
+  loadingProfileUpdate:false,
+  loadingPasswordUpdate:false,
   isError:false,
   isSuccess:false,
   errorMsg:"",
@@ -191,23 +195,33 @@ const userSlice = createSlice({
     })
 
     //update user profile actions
+    builder.addCase(updateProfile.pending, (state) => {
+      state.loadingProfileUpdate=true
+    })
     builder.addCase(updateProfile.fulfilled, (state,action) => {
       state.isSuccess=true
+      state.loadingProfileUpdate=false
       state.successMsg='Profile Has Been Updated Successfully'
       state.userInfo={...action.payload}
     })
     builder.addCase(updateProfile.rejected, (state,action:any) => {
       state.isError=true
+      state.loadingProfileUpdate=false
       state.errorMsg=`${action.payload.response.data.message}`
     })
 
     //update user password actions
+    builder.addCase(updatePassword.pending, (state) => {
+      state.loadingPasswordUpdate=true
+    })
     builder.addCase(updatePassword.fulfilled, (state) => {
       state.isSuccess=true
+      state.loadingPasswordUpdate=false
       state.successMsg='Password Has Been Updated Successfully'
     })
     builder.addCase(updatePassword.rejected, (state,action:any) => {
       state.isError=true
+      state.loadingPasswordUpdate=false
       state.errorMsg=`${action.payload.response.data.message}`
     })
 
@@ -227,9 +241,16 @@ const userSlice = createSlice({
     })
 
     // delete single user
+    builder.addCase(deleteUser.pending, (state) => {
+      state.isLoading=true
+    })
     builder.addCase(deleteUser.fulfilled, (state) => {
       state.isSuccess=true
+      state.isLoading=false
       state.successMsg='User Has Been Deleted Successfully'
+    })
+    builder.addCase(deleteUser.rejected, (state) => {
+      state.isLoading=false
     })
   }
 })

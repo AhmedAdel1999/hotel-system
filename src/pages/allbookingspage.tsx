@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {   Button, Stack, Typography } from "@mui/material";
+import {   Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { useToasts } from "react-toast-notifications";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import MainPagination from "../components/pagination";
@@ -10,10 +10,19 @@ import Loader from "../components/loading/loader";
 
 const AllBookings = ({ownbooking}:{ownbooking?:boolean}) =>{
     const[currentPage,setCurrentPage] = useState<number>(1)
-    const{allBookings,isSuccess,successMsg} = useAppSelector((state)=>state.booking)
+    const[currentBookingId,setCurrentBookingId] = useState<string>("")
+    const{allBookings,isSuccess,successMsg,isLoading} = useAppSelector((state)=>state.booking)
     const{userInfo} = useAppSelector((state)=>state.user)
     const dispatch = useAppDispatch()
     const { addToast:notify } = useToasts()
+
+    useEffect(()=>{
+        if(allBookings?.count>0){
+            if(allBookings?.bookings.length==0){
+                setCurrentPage(currentPage - 1)
+            }
+        }
+    },[allBookings?.pages])
     
     useEffect(()=>{
         if(ownbooking){
@@ -41,11 +50,11 @@ const AllBookings = ({ownbooking}:{ownbooking?:boolean}) =>{
     const tableRow = allBookings?.bookings?.map((booking:any)=>{
         const mainRows={
             cell1:(<Typography fontSize={17} variant="caption">{booking._id}</Typography>),
-            cell2:(<Typography fontSize={17} variant="caption">{booking.room.name}</Typography>),
+            cell2:(<Typography fontSize={17} variant="caption">{booking?.room?.name || "May Be This Room deleted"}</Typography>),
             cell3:(<Typography fontSize={17} variant="caption">{moment(booking.checkInDate).format("LL")}</Typography>),
             cell4:(<Typography fontSize={17} variant="caption">{moment(booking.checkOutDate).format("LL")}</Typography>),
             cell5:(<Typography fontSize={17} variant="caption">{booking.amountPaid}$</Typography>),
-            cell6:(<Typography fontSize={17} variant="caption">{booking.user.name}</Typography>),
+            cell6:(<Typography fontSize={17} variant="caption">{booking?.user?.name || "May Be This User deleted"}</Typography>),
         }
         if(userInfo?.isAdmin){
             return{
@@ -54,7 +63,15 @@ const AllBookings = ({ownbooking}:{ownbooking?:boolean}) =>{
                     disableElevation disableRipple 
                     variant="contained" color="error" 
                     size="medium"
-                    onClick={()=>dispatch(deleteBooking({token:userInfo.token,id:booking._id}))}
+                    endIcon={
+                        isLoading&&(booking._id==currentBookingId)?
+                        <CircularProgress size={25} sx={{color:"#fff"}} />
+                        :null
+                    }
+                    onClick={()=>{
+                        dispatch(deleteBooking({token:userInfo.token,id:booking._id}))
+                        setCurrentBookingId(booking._id)
+                    }}
                 >
                     Delete
                 </Button>
@@ -73,7 +90,7 @@ const AllBookings = ({ownbooking}:{ownbooking?:boolean}) =>{
             <TableShared tableHeader={tableHeader} tableRow={tableRow} />
             {
                 allBookings?.pages?(
-                 <MainPagination setCurrentPage={setCurrentPage} numOfPages={allBookings.pages} />
+                 <MainPagination currentPage={currentPage} setCurrentPage={setCurrentPage} numOfPages={allBookings.pages} />
                 )
                 :null
              }

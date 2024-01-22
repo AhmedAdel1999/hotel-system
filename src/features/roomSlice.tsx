@@ -150,9 +150,16 @@ extraReducers: builder => {
     });
 
     //delete single room
+    builder.addCase(deleteRoom.pending,(state)=>{
+        state.isLoading=true
+    });
     builder.addCase(deleteRoom.fulfilled,(state)=>{
         state.isSuccess=true
+        state.isLoading=false
         state.successMsg='Room Has Been Successfully Deleted'
+    });
+    builder.addCase(deleteRoom.rejected,(state)=>{
+        state.isLoading=false
     });
 
     // add reviews actions

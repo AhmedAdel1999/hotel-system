@@ -3,6 +3,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { Stack } from "@mui/material";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Navbar from './components/navbar/navbar';
 import ProtectedRoute from "./components/routes/protectedroute";
 import OnlyAdmin from "./components/routes/onlyAdmin";
@@ -33,13 +34,15 @@ function App() {
     }
   })
 
+  const isToggle = useMediaQuery('(max-width:500px)');
+
   return (
     <div className="App">
       <BrowserRouter>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <ThemeProvider theme={theme}>
                 <Navbar />
-                <Stack sx={{flexBasis:"100%"}}  px={10} py={4}>
+                <Stack sx={{flexBasis:"100%"}}  px={isToggle?5:10} py={4}>
                   <Routes>
                     <Route path="/" element={<HomeScreen />} />
                     <Route path="/login" element={<LoginComponent />} />

@@ -58,7 +58,7 @@ const HomeScreen = () =>{
              }
              {
                 allRooms?.pages?(
-                 <MainPagination setCurrentPage={setCurrentPage} numOfPages={allRooms.pages} />
+                 <MainPagination currentPage={currentPage} setCurrentPage={setCurrentPage} numOfPages={allRooms.pages} />
                 )
                 :null
              }

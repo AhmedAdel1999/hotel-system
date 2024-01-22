@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Avatar, Box, Button, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { useToasts } from "react-toast-notifications";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import MainPagination from "../components/pagination";
@@ -11,11 +11,19 @@ import Loader from "../components/loading/loader";
 
 const AllUsers = () =>{
     const[currentPage,setCurrentPage] = useState<number>(1)
-    const{allUsers,userInfo,isSuccess,successMsg} = useAppSelector((state)=>state.user)
+    const[currentUserId,setCurrentUserId] = useState<string>("")
+    const{allUsers,userInfo,isSuccess,successMsg,isLoading} = useAppSelector((state)=>state.user)
     const dispatch = useAppDispatch()
     const { addToast:notify } = useToasts()
 
     
+    useEffect(()=>{
+        if(allUsers?.count>0){
+            if(allUsers?.users.length==0){
+                setCurrentPage(currentPage - 1)
+            }
+        }
+    },[allUsers?.pages])
     
     useEffect(()=>{
         dispatch(getAllUsers({token:userInfo.token,currentPage}))
@@ -54,7 +62,15 @@ const AllUsers = () =>{
                        disableElevation disableRipple 
                        variant="contained" color="error" 
                        size="medium"
-                       onClick={()=>dispatch(deleteUser({token:userInfo.token,id:user._id}))}
+                       endIcon={
+                            isLoading&&(user._id==currentUserId)?
+                            <CircularProgress size={25} sx={{color:"#fff"}} />
+                            :null
+                        }
+                        onClick={()=>{
+                            dispatch(deleteUser({token:userInfo.token,id:user._id}))
+                            setCurrentUserId(user._id)
+                        }}
                     >
                         Delete
                     </Button>
@@ -70,7 +86,7 @@ const AllUsers = () =>{
             <TableShared tableHeader={tableHeader} tableRow={tableRow} />
             {
                 allUsers?.pages?(
-                 <MainPagination setCurrentPage={setCurrentPage} numOfPages={allUsers.pages} />
+                 <MainPagination currentPage={currentPage} setCurrentPage={setCurrentPage} numOfPages={allUsers.pages} />
                 )
                 :null
              }

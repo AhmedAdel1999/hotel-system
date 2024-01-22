@@ -33,6 +33,7 @@ const CreateRoomPage = () =>{
     const[petsAllowed,setPetsAllowed]=useState<boolean>(false)
     const[roomCleaning,setRoomCleaning]=useState<boolean>(false)
     const[roomImages,setRoomImages] = useState<any>(null)
+    const[uploadImgs,setUploadImgs]=useState<boolean>(false)
 
 
     useEffect(()=>{
@@ -67,8 +68,10 @@ const CreateRoomPage = () =>{
                     fd.append('file',roomImages[key])
                     fd.append("upload_preset","ggimages")
                     fd.append("api_key", "372336693865194")
+                    setUploadImgs(true)
                     const data= await axios.post('https://api.cloudinary.com/v1_1/dibuevfps/image/upload',fd,config)
                     images.push({image:data.data.url})
+                    setUploadImgs(false)
                 }   
             }
 
@@ -212,7 +215,7 @@ const CreateRoomPage = () =>{
                             color='primary'
                             sx={{width:"fit-content"}}
                             endIcon={
-                                isLoading?
+                                isLoading || uploadImgs?
                                 <CircularProgress size={25} sx={{color:"#fff"}} />
                                 :null
                             }

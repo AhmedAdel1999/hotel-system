@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Stack,Divider, Typography } from "@mui/material";
+import { Stack,Divider, Typography, CircularProgress, Button } from "@mui/material";
 import { Formik, Form, Field , ErrorMessage } from 'formik';
 import { clearUserState, updatePassword, updateProfile } from "../features/userSlice";
 import { useAppDispatch,useAppSelector } from "../app/hooks";
@@ -12,7 +12,7 @@ const UserProfile = () =>{
 
     const dispatch  = useAppDispatch();
     const { addToast:notify } = useToasts()
-    const {isError,isSuccess,errorMsg,successMsg,userInfo} = useAppSelector((state)=>state.user)
+    const {isError,isSuccess,errorMsg,successMsg,userInfo,loadingProfileUpdate,loadingPasswordUpdate} = useAppSelector((state)=>state.user)
     const [avatar,setAvatar]=useState<any | null>(null)
     const [profileImg,setProfileImg]=useState<any | null>(userInfo?.avatar?userInfo.avatar:null)
 
@@ -140,9 +140,19 @@ const UserProfile = () =>{
                     
                             
                             <div className="submitAndredirect">
-                                <button className="submit" type="submit">
-                                   <span>Update</span>
-                                </button>
+                                <Button 
+                                    variant='contained' 
+                                    color="primary" 
+                                    size='medium'
+                                    type="submit"
+                                    endIcon={
+                                        loadingProfileUpdate?
+                                        <CircularProgress size={25} sx={{color:"#fff"}} />
+                                        :null
+                                    }
+                                >
+                                    Update
+                                </Button>
                             </div>
                         </Form>
                     </Formik>
@@ -174,9 +184,19 @@ const UserProfile = () =>{
                     
                             
                             <div className="submitAndredirect">
-                                <button className="submit" type="submit">
-                                   <span>Update</span>
-                                </button>
+                                <Button 
+                                        variant='contained' 
+                                        color="primary" 
+                                        size='medium'
+                                        type="submit"
+                                        endIcon={
+                                            loadingPasswordUpdate?
+                                            <CircularProgress size={25} sx={{color:"#fff"}} />
+                                            :null
+                                        }
+                                    >
+                                        Update
+                                    </Button>
                             </div>
                         </Form>
                     </Formik>
