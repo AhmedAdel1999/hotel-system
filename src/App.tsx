@@ -18,7 +18,9 @@ import AllBookings from "./pages/allbookingspage";
 import UserProfile from "./pages/userprofilepage";
 import EditUserPage from "./pages/adminedituserpage";
 import AdminEditRoomPage from "./pages/admineditroompage";
+import PageNotFound from "./pages/pagenotfound";
 import './App.scss';
+
 
 
 
@@ -85,6 +87,7 @@ function App() {
                       <Route path="/editroom/:roomId" element={<AdminEditRoomPage />}/>
                     </Route>
 
+                    <Route path="*" element={<PageNotFound />} />
                   </Routes>
                 </Stack>
             </ThemeProvider>
