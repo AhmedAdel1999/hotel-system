@@ -29,7 +29,7 @@ const HomeScreen = () =>{
          rooms=[...rooms.filter((room:Room)=>room.numOfBeds==numOfBeds && room.category===roomType)]
        }
        setFinalRoomResult([...rooms])
-    },[search,numOfBeds,roomType])
+    },[search,numOfBeds,roomType,allRooms.length])
 
     useEffect(()=>{
         dispatch(getAllRooms())
