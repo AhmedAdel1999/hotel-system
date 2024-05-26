@@ -1,37 +1,55 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { Reviews, Room } from '../interfaces/Room'
+import { Room } from '../interfaces/Room'
 import initialInstance from '../utils/api'
-import { AddConfigObj } from '../utils/configobjs'
-import { AddNewRoomType, addRoomReviewType, allRoomsType, deleteRoomType, getAllRoomsType, updateRoomType } from '../@types/rooms'
+import UploadImg from '../utils/uploadimg'
 
+type AddNewRoomType = {
+    data:Omit<Room,"id"|"userId">,
+    userId:string | undefined
+}
+
+type updateRoomType = {
+    data:Room,
+    userId:string | undefined,
+    roomId:string | undefined
+}
+
+type deleteRoomType = {
+    roomId:string | undefined,
+    userId:string | undefined,
+}
 
 type InitialState = {
   isLoading: boolean
+  isDeletingRoom:boolean
+  isSuccessDeleting:boolean
   isError:boolean
   isSuccess:boolean
   errorMsg:string
   successMsg:string
-  allRooms:allRoomsType
+  allRooms:Room[]
 }
 
 const initialState: InitialState = {
   isLoading: false,
+  isDeletingRoom:false,
+  isSuccessDeleting:false,
   isError:false,
   isSuccess:false,
   errorMsg:"",
   successMsg:"",
-  allRooms:{} as allRoomsType,
+  allRooms:[] as Room[],
 }
 
 
 export const getAllRooms = createAsyncThunk(
     "room/getallrooms",
-    async ({currentPage,numOfBeds,roomType,search}:getAllRoomsType,{rejectWithValue,fulfillWithValue}) => {
+    async (undefined,{rejectWithValue,fulfillWithValue}) => {
         try {
-            const res = await initialInstance.get(`rooms/?keyword=${search}&numOfBeds=${numOfBeds}&roomType=${roomType}&pageNumber=${currentPage}`)
+            const res = await initialInstance.get(`rooms`)
             return fulfillWithValue(res.data)
-        } catch (error) {
-            return rejectWithValue(error)
+        } catch (error:any) {
+            return rejectWithValue(error.message)
         }
     }
 )
@@ -50,9 +68,10 @@ export const getSingleRoom = createAsyncThunk(
 
 export const AddNewRoom = createAsyncThunk(
     "room/AddNewRoom",
-    async ({data,token}:AddNewRoomType,{rejectWithValue,fulfillWithValue}) => {
+    async ({data,userId}:AddNewRoomType,{rejectWithValue,fulfillWithValue}) => {
         try {
-            const res = await initialInstance.post(`rooms/`,data,AddConfigObj(token))
+            const roomImg= await UploadImg(data.image)
+            const res = await initialInstance.post(`users/${userId}/rooms/`,{...data,image:roomImg})
             return fulfillWithValue(res.data)
         } catch (error) {
             return rejectWithValue(error)
@@ -62,24 +81,30 @@ export const AddNewRoom = createAsyncThunk(
 
 export const updateRoom = createAsyncThunk(
     "room/updateRoom",
-    async ({data,token,roomId}:updateRoomType,{rejectWithValue,fulfillWithValue}) => {
+    async ({data,roomId,userId}:updateRoomType,{rejectWithValue,fulfillWithValue}) => {
         try {
-            const res = await initialInstance.put(`rooms/${roomId}`,data,AddConfigObj(token))
-            return fulfillWithValue(res.data)
-        } catch (error) {
-            return rejectWithValue(error)
+            if(typeof(data.image)==="string"){
+                const res = await initialInstance.put(`users/${userId}/rooms/${roomId}`,data)
+                return fulfillWithValue(res.data)
+            }else{
+                const roomImg = await UploadImg(data.image)
+                const res = await initialInstance.put(`users/${userId}/rooms/${roomId}`,{...data,image:roomImg})
+                return fulfillWithValue(res.data)
+            }
+        } catch (error:any) {
+            return rejectWithValue(error.message)
         }
     }
 )
 
 export const deleteRoom = createAsyncThunk(
     "room/deleteRoom",
-    async ({id,token}:deleteRoomType,{rejectWithValue,fulfillWithValue}) => {
+    async ({roomId,userId}:deleteRoomType,{rejectWithValue,fulfillWithValue}) => {
         try {
-            const res = await initialInstance.delete(`rooms/${id}`,AddConfigObj(token))
+            const res = await initialInstance.delete(`users/${userId}/rooms/${roomId}`)
             return fulfillWithValue(res.data)
-        } catch (error) {
-            return rejectWithValue(error)
+        } catch (error:any) {
+            return rejectWithValue(error.message)
         }
     }
 )
@@ -87,12 +112,12 @@ export const deleteRoom = createAsyncThunk(
 export const AddRoomReview = createAsyncThunk(
     "room/AddRoomReview",
 
-    async ({data,token,roomId}:addRoomReviewType,{rejectWithValue,fulfillWithValue}) => {
+    async ({data,roomId,userId}:updateRoomType,{rejectWithValue,fulfillWithValue}) => {
         try {
-            const res = await initialInstance.post(`rooms/${roomId}/reviews`,{...data},AddConfigObj(token))
+            const res = await initialInstance.put(`users/${userId}/rooms/${roomId}`,{...data})
             return fulfillWithValue(res.data)
-        } catch (error) {
-            return rejectWithValue(error)
+        } catch (error:any) {
+            return rejectWithValue(error.message)
         }
     }
 )
@@ -101,6 +126,8 @@ const roomSlice = createSlice({
     initialState,
     reducers: {
         clearRoomState:((state)=>{
+            state.isDeletingRoom=false;
+            state.isSuccessDeleting=false;
             state.isError=false;
             state.isSuccess=false;
             state.errorMsg="";
@@ -115,7 +142,7 @@ extraReducers: builder => {
     });
     builder.addCase(getAllRooms.fulfilled,(state,action)=>{
         state.isLoading=false;
-        state.allRooms={...action.payload}
+        state.allRooms=[...action.payload]
     });
     builder.addCase(getAllRooms.rejected,(state,action)=>{
         state.isLoading=false
@@ -125,8 +152,8 @@ extraReducers: builder => {
     //get single room
     builder.addCase(getSingleRoom.fulfilled,(state,action)=>{
         let currentRoom = {...action.payload}
-        let roomIndex = state.allRooms.rooms.findIndex((el)=>el._id===currentRoom._id)
-        state.allRooms.rooms.splice(roomIndex,1,{...currentRoom})
+        let roomIndex = state.allRooms.findIndex((el)=>el.id===currentRoom.id)
+        state.allRooms.splice(roomIndex,1,{...currentRoom})
     });
 
     //Add New Room Actions
@@ -151,30 +178,30 @@ extraReducers: builder => {
 
     //delete single room
     builder.addCase(deleteRoom.pending,(state)=>{
-        state.isLoading=true
+        state.isDeletingRoom=true
     });
     builder.addCase(deleteRoom.fulfilled,(state)=>{
-        state.isSuccess=true
-        state.isLoading=false
+        state.isSuccessDeleting=true
+        state.isDeletingRoom=false
         state.successMsg='Room Has Been Successfully Deleted'
     });
     builder.addCase(deleteRoom.rejected,(state)=>{
-        state.isLoading=false
+        state.isDeletingRoom=false
     });
 
     // add reviews actions
     builder.addCase(AddRoomReview.pending,(state)=>{
         state.isLoading=true
     });
-    builder.addCase(AddRoomReview.fulfilled,(state,action:any)=>{
+    builder.addCase(AddRoomReview.fulfilled,(state)=>{
         state.isLoading=false
         state.isSuccess=true
-        state.successMsg=`${action.payload.message}`
+        state.successMsg=`You Have Successfully Add An Review`
     });
-    builder.addCase(AddRoomReview.rejected,(state,action:any)=>{
+    builder.addCase(AddRoomReview.rejected,(state)=>{
         state.isLoading=false
         state.isError=true
-        state.errorMsg=`You Have ${action.payload.response.data.message}`
+        state.errorMsg=`You Faild To Add An Review`
     });
 
    }

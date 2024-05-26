@@ -7,13 +7,15 @@ import ErrorMsg from "../components/error";
 import { useToasts } from "react-toast-notifications";
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from "yup";
+import { User } from "../interfaces/User";
 import "../styles/_mainform.scss"
+
 
 
 const EditUserPage = () =>{
     const {userId} = useParams()
-    const {isError,isSuccess,errorMsg,isLoading,successMsg,allUsers,userInfo} = useAppSelector((state)=>state.user)
-    const currentUser = allUsers?.users.filter((ele:any)=>ele._id==userId)[0]
+    const {isError,isSuccess,errorMsg,isLoading,successMsg,allUsers} = useAppSelector((state)=>state.user)
+    const currentUser = allUsers?.filter((ele:User)=>ele.id==userId)[0]
     const navigate = useNavigate()
     const dispatch  = useAppDispatch();
     const { addToast:notify } = useToasts()
@@ -39,9 +41,8 @@ const EditUserPage = () =>{
 
    const onsubmit = (values:{name:string,email:string}) =>{
       dispatch(updateUser({
-        token:userInfo.token,
         userId,
-        data:{...values,isAdmin}
+        data:{...currentUser,...values,isAdmin}
       }))
    }
 
@@ -57,7 +58,9 @@ const EditUserPage = () =>{
     return(
         <Stack direction="row" justifyContent="center">
             <Stack direction="column" sx={{width: "570px",maxWidth:"570px",minWidth:"300px"}}>
-                <Typography mb={2} variant="h5" fontWeight={500}>Update User</Typography>
+                <Typography mb={2} sx={{fontWeight:"bold",fontSize:"32px",color:"#444"}} variant="h2">
+                    Update User
+                </Typography>
                 <Formik 
                     initialValues={{
                         name:`${currentUser.name}`,

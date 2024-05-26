@@ -3,7 +3,7 @@ import { useAppSelector } from "../../app/hooks"
 
 const OnlyAdmin = () =>{
     const {userInfo} = useAppSelector((state)=>state.user)
-    const isAdmin = userInfo.isAdmin?true:false
+    const isAdmin = userInfo?.isAdmin?true:false
     
     return isAdmin?<Outlet />:<Navigate to="/" replace />
 }

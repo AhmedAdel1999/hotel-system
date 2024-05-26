@@ -8,10 +8,10 @@ import dayjs from 'dayjs';
 import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { Link } from "react-router-dom";
-import { CheckBookingAvaliable, NewBooking, clearBookingState } from "../../features/bookingSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { AddNewBooking,clearUserState } from "../../features/userSlice";
 import { useToasts } from "react-toast-notifications";
-import { PaymentInfo } from "../../interfaces/Booking";
+import { PaymentInfo } from "../../interfaces/User";
 import TableShared from "../tableShared";
 
 
@@ -33,10 +33,10 @@ const RoomDescription = ({roomInfo}:RoomDescriptionProps) =>{
 
   const totalDays = CheckinOutDate[1].$D - CheckinOutDate[0].$D
   const {userInfo} = useAppSelector((state)=>state.user)
-  const {isSuccess,isError,successMsg,errorMsg} = useAppSelector((state)=>state.booking)
-  const {roomAvailable} = useAppSelector((state)=>state.booking)
+  const {isSuccess,isError,successMsg,errorMsg} = useAppSelector((state)=>state.user)
   const { addToast:notify } = useToasts()
   const dispatch = useAppDispatch();
+  const navigate = useNavigate()
 
   useEffect(()=>{
     if(isError){
@@ -45,7 +45,7 @@ const RoomDescription = ({roomInfo}:RoomDescriptionProps) =>{
           appearance: 'warning',
           autoDismiss:true
       })
-      dispatch(clearBookingState())
+      dispatch(clearUserState())
      }else{
 
       if(isSuccess){
@@ -53,16 +53,12 @@ const RoomDescription = ({roomInfo}:RoomDescriptionProps) =>{
             appearance: 'success',
             autoDismiss:true
         })
-        dispatch(clearBookingState())
+        dispatch(clearUserState())
+        navigate("/")
        }
      }
   },[isSuccess,isError])
 
-  useEffect(()=>{
-     dispatch(CheckBookingAvaliable({room:roomInfo._id,checkInDate:CheckinOutDate[0],
-      checkOutDate:CheckinOutDate[1]}
-      ))
-  },[CheckinOutDate])
 
 const tranSuccess = (payment:any)=>{
 
@@ -71,23 +67,29 @@ const tranSuccess = (payment:any)=>{
     email_address:payment.email
   }
 
-  dispatch(NewBooking({
+  dispatch(AddNewBooking({
     data:{
-        room:roomInfo._id,
-        user:userInfo?.id,
-        checkInDate:CheckinOutDate[0] as Date,
-        checkOutDate:CheckinOutDate[1] as Date,
-        amountPaid:totalDays*roomInfo.pricePerNight,
-        daysOfStay:totalDays,
-        paymentInfo:paymentInfo
+        ...userInfo,
+        bookings:[
+          ...userInfo.bookings,
+          {
+            roomName:roomInfo.name,
+            userName:userInfo.name,
+            bookingId:paymentInfo.id,
+            checkInDate:CheckinOutDate[0] as Date,
+            checkOutDate:CheckinOutDate[1] as Date,
+            amountPaid:totalDays*roomInfo.pricePerNight,
+            daysOfStay:totalDays,
+          }
+        ]
     },
-    token:userInfo.token
+    userId:userInfo.id,
   }))
 }
 
 const tableHeader = [
   {name:"Guests"},{name:"Beds"},
-  {name:"Internet"},{name:"Air Conditioned"},
+  {name:"Internet"},{name:"breakfast"},{name:"Air Conditioned"},
   {name:"Pets Allowed"},{name:"Room Cleaning"},
 ]
 
@@ -95,9 +97,10 @@ const tableRow = [{
   cell1:(<Typography fontSize={17} variant="caption">{roomInfo.guestCapacity}</Typography>),
   cell2:(<Typography fontSize={17} variant="caption">{roomInfo.numOfBeds}</Typography>),
   cell3:(<Typography fontSize={17} variant="caption">{roomInfo.internet?<DoneIcon />:<ClearIcon />}</Typography>),
-  cell4:(<Typography fontSize={17} variant="caption">{roomInfo.airConditioned?<DoneIcon />:<ClearIcon />}</Typography>),
-  cell5:(<Typography fontSize={17} variant="caption">{roomInfo.petsAllowed?<DoneIcon />:<ClearIcon />}</Typography>),
-  cell6:(<Typography fontSize={17} variant="caption">{roomInfo.roomCleaning?<DoneIcon />:<ClearIcon />}</Typography>),
+  cell4:(<Typography fontSize={17} variant="caption">{roomInfo.breakfast?<DoneIcon />:<ClearIcon />}</Typography>),
+  cell5:(<Typography fontSize={17} variant="caption">{roomInfo.airConditioned?<DoneIcon />:<ClearIcon />}</Typography>),
+  cell6:(<Typography fontSize={17} variant="caption">{roomInfo.petsAllowed?<DoneIcon />:<ClearIcon />}</Typography>),
+  cell7:(<Typography fontSize={17} variant="caption">{roomInfo.roomCleaning?<DoneIcon />:<ClearIcon />}</Typography>),
 }]
     return(
         <Grid container gap={4}>
@@ -123,13 +126,11 @@ const tableRow = [{
                           </DemoItem>
                        </DemoContainer>
                        {
-                        userInfo?.token?
+                        Object.keys(userInfo).length>0?
                         (
                           <Alert severity="info" sx={{width:"fit-content",marginBottom:"10px"}}>
                               <AlertTitle>
-                                {
-                                  roomAvailable?`Room Is Available Pay $${totalDays*roomInfo.pricePerNight}`:"Room Is Not Available"
-                                }
+                                  Room Is Available Pay ${totalDays*roomInfo.pricePerNight}
                               </AlertTitle>
                           </Alert>
                         )
@@ -141,7 +142,7 @@ const tableRow = [{
                         )
                        }
                        {
-                        roomAvailable&&(userInfo?.token)?
+                        userInfo?
                           <Box sx={{marginTop:"10px"}}>
                             <PaypalButton
                               total={totalDays}

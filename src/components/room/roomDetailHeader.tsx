@@ -21,11 +21,11 @@ const RoomDetailHeader = ({roomInfo}:RoomDetailProps) =>{
             }
            }}
         >
-            <Typography variant="h3" gutterBottom>
+            <Typography sx={{fontWeight:"bold",fontSize:"32px",color:"#444",textTransform:"capitalize"}} variant="h2" gutterBottom>
                 {roomInfo.name}
             </Typography>
             <Typography variant="h5" gutterBottom>
-                {roomInfo.description}
+                {roomInfo.address}
             </Typography>
             <Stack spacing={0.5} direction="row">
                 <Rating
@@ -38,7 +38,7 @@ const RoomDetailHeader = ({roomInfo}:RoomDetailProps) =>{
                     emptyIcon={<StarBorderIcon fontSize='inherit' />}
                 />
                 <Typography>
-                    {`(${roomInfo.ratings.toFixed(0)}) Reviews`}
+                    {`(${Math.ceil(roomInfo.ratings)}) Reviews`}
                 </Typography>
             </Stack>
         </Box>

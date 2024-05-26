@@ -1,10 +1,12 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { User,UserLogin,UserRegister } from '../interfaces/User'
 import initialInstance from '../utils/api'
-import { AddConfigObj } from '../utils/configobjs'
-import { allUsers, updateProfileType, userInfo,updatePasswordType, updateUserType, getAllUsersType, deleteUserType } from '../@types/users'
-import axios from 'axios'
+import UploadImg from '../utils/uploadimg'
 
+type updateUserType={
+  data:User,
+  userId:string | undefined,
+}
 
 type InitialState = {
   isLoading: boolean
@@ -14,8 +16,8 @@ type InitialState = {
   isSuccess:boolean
   errorMsg:string
   successMsg:string
-  userInfo:userInfo | null,
-  allUsers:allUsers | null
+  userInfo:User | {},
+  allUsers:User[] | []
 }
 const initialState: InitialState = {
   isLoading: false,
@@ -25,114 +27,159 @@ const initialState: InitialState = {
   isSuccess:false,
   errorMsg:"",
   successMsg:"",
-  userInfo:{} as userInfo,
-  allUsers:{} as allUsers
+  userInfo:{} as User,
+  allUsers:[] as User[]
 }
 
+export const register =createAsyncThunk(
+  "users/register",
+  async(registerData:UserRegister,{ rejectWithValue,fulfillWithValue })=>{
 
-export const register = createAsyncThunk(
-  'user/register',
-  async (data:UserRegister,{rejectWithValue,fulfillWithValue}) =>{
-    const config = {
-      headers: {
-          "Content-Type": "multipart/form-data"
-      }
-  }
-    try {
-      if(data.avatar){
-        const avatar= await axios.post('https://api.cloudinary.com/v1_1/dibuevfps/image/upload',data.avatar,config)
-        const res = await initialInstance.post('users/register',{...data,avatar:avatar.data.url})
-        return fulfillWithValue(res.data)
+    const {email} = registerData
+    let isExist = false
+
+    try{
+      const response = await initialInstance.get("/users")
+      const data = await response.data
+
+      if(data.length>0){
+          for(let i=0; i<data.length; i++){
+            if(data[i].email===email){
+              isExist = true
+              return rejectWithValue("This User Is Already Registered");
+            }
+          }
+
+          if(!isExist){
+            let avatar=""
+            if(registerData.avatar){
+              avatar = await UploadImg(registerData.avatar)
+            } 
+            const response = await initialInstance.post("/users",{...registerData,avatar})
+            const data = await response.data
+            return fulfillWithValue(data)
+          }
+        
       }else{
-        const res = await initialInstance.post('users/register',data)
-        return fulfillWithValue(res.data)
+        let avatar=""
+        if(registerData.avatar){
+          avatar = await UploadImg(registerData.avatar)
+        } 
+        const response = await initialInstance.post("/users",{...registerData,avatar})
+        const data = await response.data
+        return fulfillWithValue(data)
       }
-    } catch (error) {
-      return rejectWithValue(error)
+    }catch(error:any){
+        return rejectWithValue(error.message)
     }
   }
 )
 
-export const login = createAsyncThunk(
-  'user/login',
-  async (data:UserLogin,{rejectWithValue,fulfillWithValue}) =>{
-  
-    try {
-      const res = await initialInstance.post('users/login',data)
-        return fulfillWithValue(res.data)
-    } catch (error) {
-      return rejectWithValue(error)
+
+export const login =createAsyncThunk(
+  "users/login",
+  async(loginData:UserLogin,{ rejectWithValue,fulfillWithValue })=>{
+
+    const{password,email}=loginData
+    let isExist = false
+    let userId:string
+
+    try{
+
+      const response = await initialInstance.get("/users")
+      const data = await response.data
+
+      if(data.length){
+        for(let i=0; i<data.length; i++){
+            if(data[i].email===email&&data[i].password===password){
+                isExist=true
+                 userId=data[i].id
+                break;
+            }
+        }
+
+        if(isExist){
+          let currentUser = data.filter((user:User)=>user.id===userId)[0]
+          return fulfillWithValue({...currentUser})
+        }else{
+          return rejectWithValue("user not found or password don,t match")
+        }
+
+      }else{
+        return rejectWithValue("user not found")
+      }
+
+    }catch(error:any){
+        return rejectWithValue(error.message)
     }
   }
 )
 
 export const updateProfile = createAsyncThunk(
   'user/updateProfile',
-  async ({data,token}:updateProfileType,{rejectWithValue,fulfillWithValue}) =>{
-    const config = {
-      headers: {
-          "Content-Type": "multipart/form-data"
-      }
-  }
+  async ({data,userId}:updateUserType,{rejectWithValue,fulfillWithValue}) =>{
+   
     try {
-      if(data.avatar){
-        const avatar= await axios.post('https://api.cloudinary.com/v1_1/dibuevfps/image/upload',data.avatar,config)
-        const res = await initialInstance.put('users/update/profile',{...data,avatar:avatar.data.url},AddConfigObj(token))
+      if(typeof(data.avatar)!=="string"){
+        const avatar= await UploadImg(data.avatar)
+        const res = await initialInstance.put(`users/${userId}`,{...data,avatar:avatar})
         return fulfillWithValue(res.data)
       }else{
-        const res = await initialInstance.put('users/update/profile',data,AddConfigObj(token))
+        const res = await initialInstance.put(`users/${userId}`,data)
         return fulfillWithValue(res.data)
       }
-    } catch (error) {
-      return rejectWithValue(error)
+    } catch (error:any) {
+      return rejectWithValue(error.message)
     }
   }
 )
 
-export const updatePassword = createAsyncThunk(
-  "user/updatePassword",
-  async ({token,data}:updatePasswordType,{rejectWithValue,fulfillWithValue}) => {
+
+
+export const updateUser = createAsyncThunk(
+  "user/updateUser",
+  async ({data,userId}:updateUserType,{rejectWithValue,fulfillWithValue}) => {
       try {
-          const res = await initialInstance.put(`/users/update/password`,data,AddConfigObj(token))
+          const res = await initialInstance.put(`/users/${userId}`,data)
           return fulfillWithValue(res.data)
-      } catch (error) {
-          return rejectWithValue(error)
+      } catch (error:any) {
+          return rejectWithValue(error.message)
       }
   }
 )
 
-export const updateUser = createAsyncThunk(
-  "user/updateUser",
-  async ({token,data,userId}:updateUserType,{rejectWithValue,fulfillWithValue}) => {
+export const AddNewBooking = createAsyncThunk(
+  "user/AddNewBooking",
+  async ({data,userId}:updateUserType,{rejectWithValue,fulfillWithValue}) => {
       try {
-          const res = await initialInstance.put(`/users/${userId}`,data,AddConfigObj(token))
+          const res = await initialInstance.put(`/users/${userId}`,data)
           return fulfillWithValue(res.data)
-      } catch (error) {
-          return rejectWithValue(error)
+      } catch (error:any) {
+          return rejectWithValue(error.message)
       }
   }
 )
 
 export const getAllUsers = createAsyncThunk(
   "user/getAllUsers",
-  async ({token,currentPage}:getAllUsersType,{rejectWithValue,fulfillWithValue}) => {
+  async (undefined,{rejectWithValue,fulfillWithValue}) => {
       try {
-          const res = await initialInstance.get(`/users/?pageNumber=${currentPage}`,AddConfigObj(token))
+          const res = await initialInstance.get(`/users`)
           return fulfillWithValue(res.data)
-      } catch (error) {
-          return rejectWithValue(error)
+      } catch (error:any) {
+          return rejectWithValue(error.message)
       }
   }
 )
 
 export const deleteUser = createAsyncThunk(
   "user/deleteUser",
-  async ({token,id}:deleteUserType,{rejectWithValue,fulfillWithValue}) => {
+  async (userId:string,{rejectWithValue,fulfillWithValue}) => {
       try {
-          const res = await initialInstance.delete(`/users/${id}`,AddConfigObj(token))
+          const res = await initialInstance.delete(`/users/${userId}`)
           return fulfillWithValue(res.data)
-      } catch (error) {
-          return rejectWithValue(error)
+      } catch (error:any) {
+          return rejectWithValue(error.message)
       }
   }
 )
@@ -142,13 +189,13 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     logout:((state)=>{
-      state.userInfo=null
+      state.userInfo={}
       state.isLoading=false;
       state.isError=false;
       state.isSuccess=false;
       state.errorMsg="";
       state.successMsg="";
-      state.allUsers=null
+      state.allUsers=[]
     }),
     clearUserState:((state)=>{
       state.isLoading=false;
@@ -164,7 +211,7 @@ const userSlice = createSlice({
     builder.addCase(register.pending, state => {
       state.isLoading = true
     })
-    builder.addCase(register.fulfilled,(state, action: PayloadAction<userInfo>) => {
+    builder.addCase(register.fulfilled,(state, action: PayloadAction<User>) => {
         state.isLoading = false
         state.isSuccess = true
         state.userInfo = {...action.payload}
@@ -173,7 +220,7 @@ const userSlice = createSlice({
     builder.addCase(register.rejected, (state,action:PayloadAction<any>) => {
       state.isLoading = false
       state.isError=true
-      state.errorMsg=`${action.payload.response.data.message}`
+      state.errorMsg=`${action.payload}`
     })
 
     //login actions
@@ -182,7 +229,7 @@ const userSlice = createSlice({
     })
     builder.addCase(
       login.fulfilled,
-      (state, action: PayloadAction<userInfo>) => {
+      (state, action: PayloadAction<User>) => {
         state.isLoading = false
         state.isSuccess = true
         state.userInfo = {...action.payload}
@@ -191,7 +238,7 @@ const userSlice = createSlice({
     builder.addCase(login.rejected, (state,action:PayloadAction<any>) => {
       state.isLoading = false
       state.isError=true
-      state.errorMsg=`${action.payload.response.data.message}`
+      state.errorMsg=`${action.payload}`
     })
 
     //update user profile actions
@@ -207,22 +254,7 @@ const userSlice = createSlice({
     builder.addCase(updateProfile.rejected, (state,action:any) => {
       state.isError=true
       state.loadingProfileUpdate=false
-      state.errorMsg=`${action.payload.response.data.message}`
-    })
-
-    //update user password actions
-    builder.addCase(updatePassword.pending, (state) => {
-      state.loadingPasswordUpdate=true
-    })
-    builder.addCase(updatePassword.fulfilled, (state) => {
-      state.isSuccess=true
-      state.loadingPasswordUpdate=false
-      state.successMsg='Password Has Been Updated Successfully'
-    })
-    builder.addCase(updatePassword.rejected, (state,action:any) => {
-      state.isError=true
-      state.loadingPasswordUpdate=false
-      state.errorMsg=`${action.payload.response.data.message}`
+      state.errorMsg=`${action.payload}`
     })
 
     //update user by Admin actions
@@ -232,12 +264,23 @@ const userSlice = createSlice({
     })
     builder.addCase(updateUser.rejected, (state,action:any) => {
       state.isError=true
-      state.errorMsg=`${action.payload.response.data.message}`
+      state.errorMsg=`${action.payload}`
+    })
+
+    //user add new booking
+    builder.addCase(AddNewBooking.fulfilled, (state,action) => {
+      state.isSuccess=true
+      state.successMsg='You Have Booking Successfully'
+      state.userInfo={...action.payload}
+    })
+    builder.addCase(AddNewBooking.rejected, (state) => {
+      state.isError=true
+      state.errorMsg='Your Booking Failed'
     })
 
     //get all users actions
     builder.addCase(getAllUsers.fulfilled, (state,action) => {
-      state.allUsers={...action.payload}
+      state.allUsers=[...action.payload]
     })
 
     // delete single user

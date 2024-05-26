@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Stack,Divider, Typography, CircularProgress, Button } from "@mui/material";
 import { Formik, Form, Field , ErrorMessage } from 'formik';
-import { clearUserState, updatePassword, updateProfile } from "../features/userSlice";
+import { clearUserState, updateProfile } from "../features/userSlice";
 import { useAppDispatch,useAppSelector } from "../app/hooks";
 import defaultImg from "../assets/user-default.jpg"
 import { useToasts } from "react-toast-notifications";
@@ -12,8 +12,7 @@ const UserProfile = () =>{
 
     const dispatch  = useAppDispatch();
     const { addToast:notify } = useToasts()
-    const {isError,isSuccess,errorMsg,successMsg,userInfo,loadingProfileUpdate,loadingPasswordUpdate} = useAppSelector((state)=>state.user)
-    const [avatar,setAvatar]=useState<any | null>(null)
+    const {isError,isSuccess,errorMsg,successMsg,userInfo,loadingProfileUpdate} = useAppSelector((state)=>state.user)
     const [profileImg,setProfileImg]=useState<any | null>(userInfo?.avatar?userInfo.avatar:null)
 
     
@@ -37,29 +36,23 @@ const UserProfile = () =>{
     
 
     //update profile function
-    const onUpdateProfile = (values:{name:string,email:string})=>{
-        if(avatar){
-            dispatch(updateProfile({token:userInfo.token,data:{...values,avatar}}))
+    const onSubmit = (values:{email:string,name:string,password:string})=>{
+        if(typeof(profileImg)!=="string"){
+            dispatch(updateProfile({
+                data:{...userInfo,...values,avatar:profileImg},
+                userId:userInfo.id
+            }))
         }
         else{
-            dispatch(updateProfile({token:userInfo.token,data:{...values}}))
+            dispatch(updateProfile({data:{...userInfo,...values},userId:userInfo.id}))
         }    
     }
 
-    //update password function
-    const onPasswordUpdate = (values:{oldPassword:string,newPassword:string}) =>{
-         dispatch(updatePassword({token:userInfo.token,data:{...values}}))
-    }
 
     //handle avatar function
     const handleAvatar = (e:React.ChangeEvent<HTMLInputElement>) =>{
         const { files} = e.target;
         const selectedFiles = files as FileList;
-        const fd = new FormData();
-        fd.append('file',selectedFiles[0])
-        fd.append("upload_preset","ggimages")
-        fd.append("api_key", "372336693865194")
-        setAvatar(fd)
         setProfileImg(selectedFiles[0])
     
     }
@@ -68,29 +61,26 @@ const UserProfile = () =>{
         const schema = Yup.object().shape({
           name:Yup.string().min(2, 'Too Short!').required("Required"),
           email:Yup.string().email("email must be like this example@gmail.com").required("Required"),
+          password:Yup.string().min(6, 'Too Short!').required("Required"),
         })
         return schema
     }
 
-    const passwordSchema = () =>{
-        const schema = Yup.object().shape({
-          oldPassword:Yup.string().min(6, 'Too Short!').required("Required"),
-          newPassword:Yup.string().min(6, 'Too Short!').required("Required"),
-        })
-        return schema
-    }
 
     return(
         <Stack direction="row" justifyContent="center">
             <Stack direction="column" sx={{width: "570px",maxWidth:"570px",minWidth:"300px"}}>
                 <Stack pb={2}>
-                    <Typography variant="h5" fontWeight={500}>Update Profile</Typography>
+                    <Typography sx={{fontWeight:"bold",fontSize:"32px",color:"#444"}} variant="h2">
+                        Update Profile
+                    </Typography>
                     <Formik 
                         initialValues={{
                             name:`${userInfo?.name}`,
                             email:`${userInfo?.email}`,
+                            password:`${userInfo?.password}`,
                         }}
-                        onSubmit={onUpdateProfile}
+                        onSubmit={onSubmit}
                         validationSchema={userSchema}
                     >
                         <Form className="form-fields">
@@ -108,7 +98,6 @@ const UserProfile = () =>{
                                 {
                                    profileImg?
                                      <label  onClick={()=>{
-                                        setAvatar(null)
                                         setProfileImg(null)
                                        }}
                                      >
@@ -137,10 +126,17 @@ const UserProfile = () =>{
                                 <Field type="email" name="email" placeholder="E-Mail" />
                                 <ErrorMessage name="email" component="span" />
                             </div>
+
+                            <div className="field">
+                                <label>Password</label>
+                                <Field type="text" name="password" placeholder="Password" />
+                                <ErrorMessage name="password" component="span" />
+                            </div>
                     
-                            
-                            <div className="submitAndredirect">
+   
+                            <Stack width={"100%"} justifyContent={"flex-start"}>
                                 <Button 
+                                   sx={{width:"fit-content"}}
                                     variant='contained' 
                                     color="primary" 
                                     size='medium'
@@ -153,51 +149,7 @@ const UserProfile = () =>{
                                 >
                                     Update
                                 </Button>
-                            </div>
-                        </Form>
-                    </Formik>
-                </Stack>
-                <Divider />
-                <Stack pt={2}>
-                    <Typography mb={2} variant="h5" fontWeight={500}>Update Password</Typography>
-                    <Formik 
-                        initialValues={{
-                            oldPassword:"",
-                            newPassword:"",
-                        }}
-                        onSubmit={onPasswordUpdate}
-                        validationSchema={passwordSchema}
-                    >
-                        <Form className="form-fields">
-
-                            <div className="field">
-                                <label>Old Password</label>
-                                <Field type="text" name="oldPassword" placeholder="Old Password" />
-                                <ErrorMessage name="oldPassword" component="span" />
-                            </div>
-
-                            <div className="field">
-                                <label>New Password</label>
-                                <Field type="text" name="newPassword" placeholder="New Password" />
-                                <ErrorMessage name="newPassword" component="span" />
-                            </div>
-                    
-                            
-                            <div className="submitAndredirect">
-                                <Button 
-                                        variant='contained' 
-                                        color="primary" 
-                                        size='medium'
-                                        type="submit"
-                                        endIcon={
-                                            loadingPasswordUpdate?
-                                            <CircularProgress size={25} sx={{color:"#fff"}} />
-                                            :null
-                                        }
-                                    >
-                                        Update
-                                    </Button>
-                            </div>
+                            </Stack>
                         </Form>
                     </Formik>
                 </Stack>

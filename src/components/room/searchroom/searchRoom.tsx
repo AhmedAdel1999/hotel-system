@@ -19,7 +19,7 @@ const SearchRoom = ({setNumOfBeds,setRoomType,setSearch,numOfBeds,roomType}:sear
                     </Typography>
                     <TextField
                         className="searchinput"
-                        placeholder='Search'
+                        placeholder='Search By Room Name'
                         variant="outlined"
                         onChange={(e)=>setSearch(e.target.value)}
                     />
@@ -34,6 +34,7 @@ const SearchRoom = ({setNumOfBeds,setRoomType,setSearch,numOfBeds,roomType}:sear
                         value={numOfBeds}
                         onChange={(e)=>setNumOfBeds(e.target.value)}
                     >
+                        <MenuItem value="Choose Num OF Beds">Choose Num OF Beds</MenuItem>
                         <MenuItem value="1">1</MenuItem>
                         <MenuItem value="2">2</MenuItem>
                         <MenuItem value="3">3</MenuItem>
@@ -51,6 +52,7 @@ const SearchRoom = ({setNumOfBeds,setRoomType,setSearch,numOfBeds,roomType}:sear
                         value={roomType}
                         onChange={(e)=>setRoomType(e.target.value)}
                     >
+                        <MenuItem value="Choose Room Type">Choose Room Type</MenuItem>
                         <MenuItem value="King">King</MenuItem>
                         <MenuItem value="Single">Single</MenuItem>
                         <MenuItem value="Twins">Twins</MenuItem>

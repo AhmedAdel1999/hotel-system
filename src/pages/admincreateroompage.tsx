@@ -22,7 +22,7 @@ const CreateRoomPage = () =>{
 
     const[name,setName] = useState<string>("")
     const[description,setDescription] = useState<string>("")
-    const[address,setAddress] = useState<string>("")
+    const[address,setAddress] = useState<string>("12th Floor,Number 1")
     const[pricePerNight,setPricePerNight] = useState<number>(0)
     const[guestCapacity,setGuestCapacity]=useState<number>(1)
     const[numOfBeds,setNumOfBeds]=useState<number>(1)
@@ -32,8 +32,7 @@ const CreateRoomPage = () =>{
     const[airConditioned,setAirConditioned]=useState<boolean>(false)
     const[petsAllowed,setPetsAllowed]=useState<boolean>(false)
     const[roomCleaning,setRoomCleaning]=useState<boolean>(false)
-    const[roomImages,setRoomImages] = useState<any>(null)
-    const[uploadImgs,setUploadImgs]=useState<boolean>(false)
+    const[roomImage,setRoomImage] = useState<any>(null)
 
 
     useEffect(()=>{
@@ -47,41 +46,29 @@ const CreateRoomPage = () =>{
       }
     },[isSuccess])
 
+    const handleRoomImg = (e:React.ChangeEvent<HTMLInputElement>) =>{
+        const { files} = e.target;
+        const selectedFiles = files as FileList;
+        setRoomImage(selectedFiles[0])
+    
+      }
 
     const handleSubmit = async (e:React.FormEvent) =>{
         e.preventDefault()
-        let images=[]
-        const config = {
-            headers: {
-                "Content-Type": "multipart/form-data"
-            }
-        }
-        if(!roomImages){
-            notify(`You Have To Add At Least One Image.`,{
+        if(!roomImage || !name || !description || !pricePerNight){
+            notify(`You Have To Fill All Fields,Add Image.`,{
                 appearance: 'warning',
                 autoDismiss:true
             })
         }else{
-            for (const key in roomImages) {
-                if(typeof(roomImages[key])=="object"){
-                    const fd = new FormData();
-                    fd.append('file',roomImages[key])
-                    fd.append("upload_preset","ggimages")
-                    fd.append("api_key", "372336693865194")
-                    setUploadImgs(true)
-                    const data= await axios.post('https://api.cloudinary.com/v1_1/dibuevfps/image/upload',fd,config)
-                    images.push({image:data.data.url})
-                    setUploadImgs(false)
-                }   
-            }
 
             dispatch(AddNewRoom({
                 data:{
                     name,description,address,category,petsAllowed,airConditioned,
                     pricePerNight,numOfBeds,guestCapacity,internet,breakfast,
-                    roomCleaning,images
+                    roomCleaning,image:roomImage,ratings:0,reviews:[]
                 },
-                token:userInfo?.token
+                userId:userInfo.id
             }))
         }
     }
@@ -89,7 +76,9 @@ const CreateRoomPage = () =>{
     return(
         <Stack alignItems="center">
             <Stack width="100%">
-                <Typography variant="h4" mb={2} fontWeight={500}>Create Room</Typography>
+                <Typography sx={{fontWeight:"bold",fontSize:"32px",color:"#444"}} variant="h2">
+                    Create Room
+                </Typography>
                 <form onSubmit={handleSubmit}>
                     <Stack gap={2}>
                         <Stack className="field">
@@ -101,7 +90,7 @@ const CreateRoomPage = () =>{
                         </Stack>
                         <Stack className="field">
                             <label>Address</label>
-                            <input onChange={(e)=>setAddress(e.target.value)} type="text" placeholder="Address" />
+                            <input onChange={(e)=>setAddress(e.target.value)} value={address} type="text" placeholder="Address" />
                         </Stack>
                         <Stack direction="row" flexWrap="wrap" justifyContent="space-between" gap="20px">
                             <Stack className="selection-field">
@@ -204,7 +193,7 @@ const CreateRoomPage = () =>{
                         </Stack>
                         <Stack className="field">
                             <label>Images</label>
-                            <input onChange={(e)=>setRoomImages(e.target.files)} type="file" multiple />
+                            <input onChange={handleRoomImg} type="file" />
                         </Stack>
                         <Button
                             disableFocusRipple
@@ -215,7 +204,7 @@ const CreateRoomPage = () =>{
                             color='primary'
                             sx={{width:"fit-content"}}
                             endIcon={
-                                isLoading || uploadImgs?
+                                isLoading?
                                 <CircularProgress size={25} sx={{color:"#fff"}} />
                                 :null
                             }

@@ -4,9 +4,9 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useToasts } from "react-toast-notifications";
 import { useNavigate, useParams } from "react-router-dom";
 import { clearRoomState, updateRoom } from "../features/roomSlice";
-import RoomImgSlider from "../components/room/rommimgslider";
-import axios from "axios";
+import { Room } from "../interfaces/Room";
 import "../styles/createroom.scss";
+
 
 
 
@@ -22,7 +22,7 @@ const AdminEditRoomPage = () =>{
     const { addToast:notify } = useToasts()
     const {userInfo} = useAppSelector((state)=>state.user)
     const {isSuccess,successMsg,isLoading,allRooms} = useAppSelector((state)=>state.rooms)
-    const currentRoom = allRooms?.rooms.filter((room:any)=>room._id==roomId)[0]
+    const currentRoom = allRooms?.filter((room:Room)=>room.id==roomId)[0]
 
 
     const[name,setName] = useState<string>(currentRoom.name)
@@ -37,8 +37,7 @@ const AdminEditRoomPage = () =>{
     const[airConditioned,setAirConditioned]=useState<boolean>(currentRoom.airConditioned)
     const[petsAllowed,setPetsAllowed]=useState<boolean>(currentRoom.petsAllowed)
     const[roomCleaning,setRoomCleaning]=useState<boolean>(currentRoom.roomCleaning)
-    const[updatedRoomImages,setUpdatedRoomImages] = useState<any>(null)
-    const[uploadImgs,setUploadImgs]=useState<boolean>(false)
+    const[updatedRoomImage,setUpdatedRoomImage] = useState<any>(null)
 
 
     useEffect(()=>{
@@ -52,49 +51,38 @@ const AdminEditRoomPage = () =>{
       }
     },[isSuccess])
 
+    const handleRoomImg = (e:React.ChangeEvent<HTMLInputElement>) =>{
+        const { files} = e.target;
+        const selectedFiles = files as FileList;
+        setUpdatedRoomImage(selectedFiles[0])
+      }
 
     const handleSubmit = async (e:React.FormEvent) =>{
         e.preventDefault()
-        let images=[]
-        const config = {
-            headers: {
-                "Content-Type": "multipart/form-data"
-            }
-        }
-        if(updatedRoomImages){
-            for (const key in updatedRoomImages) {
-                if(typeof(updatedRoomImages[key])=="object"){
-                    const fd = new FormData();
-                    fd.append('file',updatedRoomImages[key])
-                    fd.append("upload_preset","ggimages")
-                    fd.append("api_key", "372336693865194")
-                    setUploadImgs(true)
-                    const data= await axios.post('https://api.cloudinary.com/v1_1/dibuevfps/image/upload',fd,config)
-                    images.push({image:data.data.url})
-                    setUploadImgs(false)
-                }   
-            }
 
+        if(updatedRoomImage){
             dispatch(updateRoom({
                 data:{
+                    ...currentRoom,
                     name,description,address,category,petsAllowed,airConditioned,
                     pricePerNight,numOfBeds,guestCapacity,internet,breakfast,
-                    roomCleaning,images
+                    roomCleaning,image:updatedRoomImage
                 },
-                token:userInfo?.token,
-                roomId
+                roomId,
+                userId:userInfo.id
             }))
         
         
         }else{
             dispatch(updateRoom({
                 data:{
+                    ...currentRoom,
                     name,description,address,category,petsAllowed,airConditioned,
                     pricePerNight,numOfBeds,guestCapacity,internet,breakfast,
-                    roomCleaning,images:[...currentRoom.images]
+                    roomCleaning
                 },
-                token:userInfo?.token,
-                roomId
+                roomId,
+                userId:userInfo.id
             }))
         }
     }
@@ -102,8 +90,17 @@ const AdminEditRoomPage = () =>{
     return(
         <Stack alignItems="center">
             <Stack width="100%">
-                <Typography variant="h4" mb={2} fontWeight={500}>Update Room</Typography>
-                <RoomImgSlider sliderImgs={currentRoom.images} />
+                <Typography sx={{fontWeight:"bold",fontSize:"32px",color:"#444"}} variant="h2" mb={2}>
+                    Update Room
+                </Typography>
+                <Stack sx={{width:"100%",height:"250px"}}>
+                    <img 
+                      loading="lazy"
+                      alt="room-img"
+                      src={updatedRoomImage?URL.createObjectURL(updatedRoomImage):currentRoom.image}
+                      style={{width:"100%",height:"100%",objectFit:"fill",objectPosition:"center"}}
+                    />
+                </Stack>
                 <form onSubmit={handleSubmit}>
                     <Stack gap={2}>
                         <Stack className="field">
@@ -218,7 +215,7 @@ const AdminEditRoomPage = () =>{
                         </Stack>
                         <Stack className="field">
                             <label>Images</label>
-                            <input onChange={(e)=>setUpdatedRoomImages(e.target.files)} type="file" multiple />
+                            <input onChange={handleRoomImg} type="file" multiple />
                         </Stack>
                         <Button
                             disableFocusRipple
@@ -229,7 +226,7 @@ const AdminEditRoomPage = () =>{
                             color='primary'
                             sx={{width:"fit-content"}}
                             endIcon={
-                                isLoading || uploadImgs?
+                                isLoading?
                                 <CircularProgress size={25} sx={{color:"#fff"}} />
                                 :null
                             }

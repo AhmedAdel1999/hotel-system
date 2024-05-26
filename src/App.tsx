@@ -49,34 +49,21 @@ function App() {
                     <Route path="/" element={<HomeScreen />} />
                     <Route path="/login" element={<LoginComponent />} />
                     <Route path="/register" element={<RegisterComponent />} />
-                    <Route path="/singleroom/:id" element={<SingleRoomScreen />} />
-
-                    <Route path="/mybookings" element={<ProtectedRoute />}>
-                      <Route path="/mybookings" element={<AllBookings ownbooking={true} />}/>
-                    </Route>
 
                     <Route path="/profile" element={<ProtectedRoute />}>
                       <Route path="/profile" element={<UserProfile />}/>
-                    </Route>
-
-                    <Route path="/allrooms" element={<OnlyAdmin />}>
-                      <Route path="/allrooms" element={<AllRooms />}/>
                     </Route>
 
                     <Route path="/allusers" element={<OnlyAdmin />}>
                       <Route path="/allusers" element={<AllUsers />}/>
                     </Route>
 
-                    <Route path="/allbookings" element={<OnlyAdmin />}>
-                      <Route path="/allbookings" element={<AllBookings />}/>
-                    </Route>
-
-                    <Route path="/adminbookings" element={<OnlyAdmin />}>
-                      <Route path="/adminbookings" element={<AllBookings ownbooking={true} />}/>
-                    </Route>
-
                     <Route path="/edituser/:userId" element={<OnlyAdmin />}>
                       <Route path="/edituser/:userId" element={<EditUserPage />}/>
+                    </Route>
+
+                    <Route path="/allrooms" element={<OnlyAdmin />}>
+                      <Route path="/allrooms" element={<AllRooms />}/>
                     </Route>
 
                     <Route path="/createroom" element={<OnlyAdmin />}>
@@ -85,6 +72,21 @@ function App() {
 
                     <Route path="/editroom/:roomId" element={<OnlyAdmin />}>
                       <Route path="/editroom/:roomId" element={<AdminEditRoomPage />}/>
+                    </Route>
+
+                    <Route path="/singleroom/:id" element={<SingleRoomScreen />} />
+                    
+                    <Route path="/mybookings" element={<ProtectedRoute />}>
+                      <Route path="/mybookings" element={<AllBookings ownbooking={true} />}/>
+                    </Route>
+
+                    
+                    <Route path="/allbookings" element={<OnlyAdmin />}>
+                      <Route path="/allbookings" element={<AllBookings />}/>
+                    </Route>
+
+                    <Route path="/adminbookings" element={<OnlyAdmin />}>
+                      <Route path="/adminbookings" element={<AllBookings ownbooking={true} />}/>
                     </Route>
 
                     <Route path="*" element={<PageNotFound />} />

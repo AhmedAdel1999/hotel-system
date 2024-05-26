@@ -36,8 +36,10 @@ const RoomReview = ({roomInfo}:RoomReviewProps) =>{
             appearance: 'success',
             autoDismiss:true
         })
+        setComment("")
+        setRatingValue(0)
+        dispatch(getSingleRoom(roomInfo.id))
         dispatch(clearRoomState())
-        dispatch(getSingleRoom(roomInfo._id))
        }
     },[isError,isSuccess])
     
@@ -50,13 +52,21 @@ const RoomReview = ({roomInfo}:RoomReviewProps) =>{
         }else{
             dispatch(AddRoomReview({
                 data:{
-                    user:userInfo.id,
-                    name:userInfo.username,
-                    rating:ratingValue,
-                    comment:comment,
+                    ...roomInfo,
+                    reviews:[
+                        ...roomInfo.reviews,
+                        {
+                            userId:userInfo.id,
+                            name:userInfo.name,
+                            rating:ratingValue,
+                            comment:comment,
+                        }
+                    ],
+                    ratings: roomInfo.reviews.length?
+                    (Number(ratingValue+roomInfo.ratings) / 5):ratingValue
                 },
-                token:userInfo.token,
-                roomId:roomInfo._id
+                userId:userInfo.id,
+                roomId:roomInfo.id
             }))
         }
         
@@ -69,7 +79,7 @@ const RoomReview = ({roomInfo}:RoomReviewProps) =>{
                     Reviews
                 </Typography>
                 {
-                    !userInfo?.token?
+                    Object.keys(userInfo).length===0?
                     (
                         <Alert severity="info">
                             <AlertTitle><Link to="/login">Sign in</Link> to write a review</AlertTitle>
@@ -106,6 +116,7 @@ const RoomReview = ({roomInfo}:RoomReviewProps) =>{
                                 onChange={
                                     (e)=>setComment(e.target.value)
                                 }
+                                value={comment}
                                 placeholder="Comments"
                                 multiline
                                 rows={4}
@@ -130,8 +141,10 @@ const RoomReview = ({roomInfo}:RoomReviewProps) =>{
                 {
                     roomInfo.reviews.map((rev:Reviews)=>{
                         return(
-                            <Stack key={rev.user} rowGap="5px">
-                                <Typography fontWeight={500} variant="h5">{rev.name}</Typography>
+                            <Stack key={rev.userId} rowGap="5px">
+                                <Typography textTransform={"capitalize"} fontWeight={500} variant="h5">
+                                    {rev.name}
+                                </Typography>
                                 <Box
                                   sx={{
                                     display:"flex",

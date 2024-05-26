@@ -6,7 +6,9 @@ const PageNotFound = () => {
 
     return(
         <Stack sx={{justifyContent:"center",alignItems:"center",flexBasis:"100%",gap:"20px"}}>
-            <Typography variant="h2">404 Page Not Found</Typography>
+            <Typography sx={{fontWeight:"bold",fontSize:"32px",color:"#444"}} variant="h2">
+                404 Page Not Found
+            </Typography>
             <Button
              disableElevation
              disableRipple

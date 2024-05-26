@@ -17,13 +17,13 @@ const RoomCard = ({roomInfo}:RoomCardProps) =>{
           <CardMedia
             component='img'
             className="cardimg"
-            image={`${roomInfo.images[0].image}`}
+            image={`${roomInfo.image}`}
             alt='image'
           />
           <CardContent>
 
             <Typography variant="h5"className="roomlink" gutterBottom>
-                <Link to={`/singleroom/${roomInfo._id}`}>{roomInfo.name}</Link>
+                <Link to={`/singleroom/${roomInfo.id}`}>{roomInfo.name}</Link>
             </Typography>
 
             <Typography variant="h5" className="roompriceinfo" gutterBottom>
@@ -41,7 +41,7 @@ const RoomCard = ({roomInfo}:RoomCardProps) =>{
                     emptyIcon={<StarBorderIcon fontSize='inherit' />}
                 />
                 <Typography>
-                    {`(${roomInfo.ratings.toFixed(0)}) Reviews`}
+                    {`(${Math.ceil(roomInfo.ratings)}) Reviews`}
                 </Typography>
             </Stack>
 
@@ -52,7 +52,7 @@ const RoomCard = ({roomInfo}:RoomCardProps) =>{
                 fullWidth
                 disableRipple
                 disableElevation
-                to={`/singleroom/${roomInfo._id}`} 
+                to={`/singleroom/${roomInfo.id}`} 
                 variant="contained" 
                 className="cardbtnlink"
             >

@@ -5,26 +5,39 @@ import { getAllRooms } from "../features/roomSlice";
 import SearchRoom from "../components/room/searchroom/searchRoom";
 import RoomCard from "../components/room/roomCard/roomCard";
 import { Room } from "../interfaces/Room";
-import MainPagination from "../components/pagination";
 
 
 const HomeScreen = () =>{
+
     const {allRooms} = useAppSelector((state)=>state.rooms)
-    const [currentPage,setCurrentPage]=useState<number>(1)
-    const [numOfBeds,setNumOfBeds]=useState<number|string>("1")
-    const [roomType,setRoomType]=useState<string>("King")
+    const [numOfBeds,setNumOfBeds]=useState<number|string>("Choose Num OF Beds")
+    const [roomType,setRoomType]=useState<string>("Choose Room Type")
     const [search,setSearch]=useState<string>("")
-
-
+    const [finleRoomResult,setFinalRoomResult] = useState<Room[]>([...allRooms])
     const dispatch = useAppDispatch();
 
+
     useEffect(()=>{
-        dispatch(getAllRooms({currentPage,numOfBeds,roomType,search}))
-    },[currentPage,numOfBeds,roomType,search])
+        let rooms:Room[]=[]
+       if(search){
+         rooms=[...allRooms.filter((room:Room)=>room.name.includes(search))]
+       }
+       if(!search){
+        rooms=[...allRooms]
+      }
+       if(numOfBeds!=="Choose Num OF Beds" || roomType!=="Choose Room Type"){
+         rooms=[...rooms.filter((room:Room)=>room.numOfBeds==numOfBeds && room.category===roomType)]
+       }
+       setFinalRoomResult([...rooms])
+    },[search,numOfBeds,roomType])
+
+    useEffect(()=>{
+        dispatch(getAllRooms())
+    },[])
 
     return(
         <Stack direction="column" rowGap="20px">
-            <Typography sx={{fontWeight:"bold",color:"#444"}} variant="h5">
+            <Typography sx={{fontWeight:"bold",fontSize:"32px",color:"#444"}} variant="h2">
                 All Rooms
             </Typography>
             <SearchRoom 
@@ -35,12 +48,12 @@ const HomeScreen = () =>{
                 roomType={roomType}
              />
              {
-                allRooms?.rooms?.length?(
+                finleRoomResult?.length?(
                         <Grid container spacing={4}>
                             {
-                                allRooms?.rooms.map((room:Room)=>{
+                                finleRoomResult?.map((room:Room)=>{
                                     return(
-                                        <Grid key={room._id} item xs={12} sm={6} md={4} lg={3}>
+                                        <Grid key={room.id} item xs={12} sm={6} md={4} lg={3}>
                                             <RoomCard 
                                             roomInfo={room}
                                             />
@@ -55,14 +68,7 @@ const HomeScreen = () =>{
                             <AlertTitle>No Rooms Avaliable</AlertTitle>
                         </Alert>
                 )
-             }
-             {
-                allRooms?.pages?(
-                 <MainPagination currentPage={currentPage} setCurrentPage={setCurrentPage} numOfPages={allRooms.pages} />
-                )
-                :null
-             }
-             
+             }             
         </Stack>
     )
 }

@@ -1,20 +1,15 @@
-
-export type Image={
-    image:string,
-    _id?:string
-}
 export type Reviews={
-    user:string,
+    userId:string,
     name:string,
     rating:number | null,
     comment:string
 }
 
 export interface Room{
-    _id:string,
+    id:string,
     name:string,
     description:string,
-    images:Image[],
+    image:string,
     pricePerNight:number,
     address:string
     guestCapacity:number,
@@ -25,8 +20,7 @@ export interface Room{
     petsAllowed:boolean
     roomCleaning:boolean,
     ratings:number
-    numOfReviews:number
     category:'King' | 'Single' | 'Twins',
     reviews:Reviews[]
-    user:string
+    userId:string
 }

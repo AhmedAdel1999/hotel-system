@@ -16,7 +16,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <ToastProvider placement='top-left'>
+    <ToastProvider placement='bottom-center'>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <React.Suspense fallback={<InitialLoading />}>

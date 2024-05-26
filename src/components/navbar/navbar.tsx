@@ -2,13 +2,14 @@ import React,{useState} from "react";
 import { NavLink,useNavigate } from "react-router-dom";
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import {AppBar,Toolbar,Typography,Stack,IconButton,Drawer, Button,Menu,MenuItem} from '@mui/material'
+import {AppBar,Toolbar,Typography,Stack,IconButton,Drawer, Button,Menu,MenuItem, Box} from '@mui/material'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard, faBars, faBookmark, faCaretDown, faHouse, 
 faPersonShelter, faRightFromBracket, faRightToBracket, faTimes, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { logout } from "../../features/userSlice";
 import defaultImg from "../../assets/user-default.jpg";
+import logo from "../../assets/logo.png"
 import "./navbar.scss"
 
 
@@ -38,7 +39,7 @@ const Navbar:React.FC = () =>{
         navigate("/",{replace:true})
     }
     const routes = () =>{
-        if(userInfo?.token){
+        if(Object.keys(userInfo).length >0){
             if(userInfo?.isAdmin){
                 return(
                     <>
@@ -148,11 +149,16 @@ const Navbar:React.FC = () =>{
         
     }
     return(
-      <AppBar position='static' className="navbar">
+      <AppBar position='sticky' className="navbar">
         <Toolbar className="main-container">   
-            <Typography variant='h4' component='div'>
-                Hotel Book
-            </Typography>
+            <Box sx={{width:"80px",height:"80px"}}>
+                <img 
+                  src={logo}
+                  loading="lazy"
+                  alt="logo-img"
+                  style={{width:"100%",height:"100%"}}
+                />
+            </Box>
             {
                 isToggle?
                 <IconButton 

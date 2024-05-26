@@ -4,7 +4,6 @@ import storage from 'reduxjs-toolkit-persist/lib/storage'
 import logger from 'redux-logger';
 import userSlice from '../features/userSlice'
 import roomSlice from '../features/roomSlice';
-import bookingSlice from '../features/bookingSlice';
 
 const persistConfig = {
     key: 'root',
@@ -14,7 +13,6 @@ const persistConfig = {
 const reducers:any= combineReducers({
     user: userSlice,
     rooms:roomSlice,
-    booking:bookingSlice
 });
 
 const _persistedReducer = persistReducer(persistConfig, reducers);

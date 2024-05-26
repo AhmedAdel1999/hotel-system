@@ -17,7 +17,6 @@ const RegisterComponent = () => {
   
   const dispatch  = useAppDispatch();
   const navigate = useNavigate();
-  const [avatar,setAvatar]=useState<any | null>(null)
   const [profileImg,setProfileImg]=useState<any | null>(null)
   const {isError,isSuccess,errorMsg,isLoading} = useAppSelector((state)=>state.user)
 
@@ -29,9 +28,9 @@ const RegisterComponent = () => {
     }
   },[isSuccess])
 
-  const onSubmit = (values:Omit<UserRegister,"avatar">)=>{
-    if(avatar){
-        dispatch(register({...values,avatar:avatar}))
+  const onSubmit = (values:UserRegister)=>{
+    if(profileImg){
+        dispatch(register({...values,avatar:profileImg}))
     }else{
         dispatch(register(values))
     } 
@@ -40,11 +39,6 @@ const RegisterComponent = () => {
   const handleAvatar = (e:React.ChangeEvent<HTMLInputElement>) =>{
     const { files} = e.target;
     const selectedFiles = files as FileList;
-    const fd = new FormData();
-    fd.append('file',selectedFiles[0])
-    fd.append("upload_preset","ggimages")
-    fd.append("api_key", "372336693865194")
-    setAvatar(fd)
     setProfileImg(selectedFiles[0])
 
   }
@@ -67,6 +61,8 @@ const RegisterComponent = () => {
                 name:"",
                 email:"",
                 password:"",
+                isAdmin:false,
+                bookings:[]
             }}
             onSubmit={onSubmit}
             validationSchema={schema}
